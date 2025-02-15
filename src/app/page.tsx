@@ -1,101 +1,183 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect, useRef } from 'react';
+import ChatMessages from '../components/ChatMessages';
+import ChatInput from '../components/ChatInput';
+import NavItem from '../components/NavItem';
+import { sendMessage } from '@/lib/Api';
+import ChatBubble from '@/components/ChatBubble';
+import Dropdown from '@/components/ui/Dropdown';
+
+const App: React.FC = () => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputFieldRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [model, setModel] = useState('qwen-2.5-coder-32b');
+
+  useEffect(() => {
+    inputFieldRef.current?.focus();
+    fetchChats().then((data) => {
+      setChats(data.reverse());
+    }).catch((error) => {
+      alert(`Error fetching chats, please try again later. ${error}`);
+    });
+  }, []);
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const generateTitle = (text: string): string => {
+    if (!text) return "New Chat";
+
+  // Remove common words and split into words
+  const stopWords = new Set(["the", "is", "a", "with", "to", "in", "and", "for", "on", "at", "of", "it"]);
+  const words = text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "") // Remove punctuation
+    .split(/\s+/) // Split by spaces
+    .filter((word) => !stopWords.has(word)); // Remove common words
+
+  return words.slice(0, 5).join(" ") + "..."; // Use first 5 words
+    // return text
+    //   .toLowerCase()
+    //   .split(" ")
+    //   .map((word, index) =>
+    //     ["a", "an", "the", "of", "in", "on", "at", "to", "for", "with", "and", "but", "or"].includes(word) && index !== 0
+    //       ? word
+    //       : word.charAt(0).toUpperCase() + word.slice(1)
+    //   )
+    //   .join(" ");
+  };
+
+  const fetchChats = async (): Promise<Chat[]> => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_RESTAPI_ENDPOINT}/chats`);
+    return response.json();
+  };
+
+  const fetchChatHistory = async (chatId: string): Promise<Message[]> => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_RESTAPI_ENDPOINT}/chat/${chatId}`);
+    return response.json();
+  };
+
+  // const sendMessage = async (message: string, chatId: string | null): Promise<any> => {
+  //   try {
+  //     const response = await fetch(`${process.env.NEXT_PUBLIC_RESTAPI_ENDPOINT}/chat${chatId ? `?chat_id=${chatId}` : ''}`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'text/plain',
+  //       },
+  //       body: message
+  //     });
+  //     return response.json();
+  //   } catch (error) {
+  //     console.error('Error', error);
+  //   }
+  // };
+  const handleModel = (model: string) => {  
+          setModel(model);
+  }
+  const handleSendMessage = (input: string) => {
+    const newMessage: Message = {
+      role: "user",
+      content: input
+    };
+    const _messages = [...messages, newMessage];
+    setMessages(_messages);
+    scrollToBottom();
+    setIsLoading(true);
+    sendMessage(_messages, model, chatId).then((response) => {
+      const message = response.data.choices[0].message; 
+      const chat:Chat = {id:response. data.id, title:generateTitle(message.content)}; 
+      if (!chatId) {
+        setChats([chat, ...chats]);
+      }
+      setChatId(response.data.id);
+      setMessages([...messages, newMessage, message]);
+      scrollToBottom();
+    }).catch((error) => {
+      alert(`Error sending message, please try again later. ${error}`);
+    }).finally(() => {
+      setIsLoading(false);
+    });
+  };
+
+  const openChat = (chatId: string) => {
+    setChatId(chatId);
+    setDrawerOpen(false);
+    fetchChatHistory(chatId).then((data) => {
+      setMessages(data);
+      scrollToBottom();
+      inputFieldRef.current?.focus();
+    });
+  };
+
+  const newChat = () => {
+    setChatId(null);
+    setMessages([]);
+    inputFieldRef.current?.focus();
+  };
+
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="antialiased bg-gray-50 dark:bg-gray-900">
+      <nav className="bg-white border-b border-gray-200 px-8 py-4 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50 h-16">
+        <div className="flex justify-between items-center">
+          <span className="p-1 font-semibold whitespace-nowrap dark:text-white">Chatbot</span>
+          <Dropdown setModel={handleModel}/>
+        </div>
+      </nav>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+
+      <aside
+        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform ${drawerOpen ? 'translate-x-0' : '-translate-x-full'} bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700`}
+        aria-label="Sidenav"
+      >
+        <div className="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
+          {chats.length > 0 && <ul className="space-y-2">
+            {chats.map((chat, index) => (
+              <NavItem key={index} active={chatId === chat.id} onClick={() => openChat(chat.id)}>
+                <span className="truncate text-ellipsis">
+                  {chat.title}
+                </span>
+              </NavItem>
+            ))}
+          </ul>}
+          <ul className={`pt-5 space-y-2 ${chats.length > 0 ? 'mt-5 border-t border-gray-200 dark:border-gray-700' : ''}`}>
+            <NavItem active={!chatId} onClick={() => newChat()}>
+              <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17h6l3 3v-3h2V9h-2M4 4h11v8H9l-3 3v-3H4V4Z" />
+              </svg>
+              <span className="ml-3 truncate text-ellipsis">
+                New chat
+              </span>
+            </NavItem>
+          </ul>
+        </div>
+      </aside>
+
+      <main className="p-4 md:ml-64 pt-20 dark:text-white h-screen">
+        <div className="flex flex-col flex-auto flex-shrink-0 rounded-2xl h-full py-2 px-4">
+          
+          <div className="h-full overflow-x-auto mb-6">
+            <ChatMessages messages={messages} />
+            <div ref={messagesEndRef} />
+            {isLoading && <div className=' px-2'> <ChatBubble role="assistant" content="Thinking..." /></div>}
+          </div>
+          <ChatInput onSendMessage={handleSendMessage} ref={inputFieldRef} />
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
-}
+};
+
+export default App;

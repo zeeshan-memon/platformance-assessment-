@@ -9,11 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mendable/firecrawl-js": "^1.17.0",
     "axios": "^1.7.9",
+    "express-rate-limit": "^7.5.0",
     "groq-sdk": "^0.15.0",
     "next": "15.1.7",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

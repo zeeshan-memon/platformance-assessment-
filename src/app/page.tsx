@@ -20,11 +20,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     inputFieldRef.current?.focus();
-    fetchChats().then((data) => {
-      setChats(data.reverse());
-    }).catch((error) => {
-      alert(`Error fetching chats, please try again later. ${error}`);
-    });
+    const chats = localStorage.getItem("chats");
+    if (chats) {
+      setChats(JSON.parse(chats));
+    }
+
   }, []);
 
   const scrollToBottom = () => {
@@ -56,66 +56,94 @@ const App: React.FC = () => {
     //   .join(" ");
   };
 
-  const fetchChats = async (): Promise<Chat[]> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_RESTAPI_ENDPOINT}/chats`);
-    return response.json();
-  };
-
-  const fetchChatHistory = async (chatId: string): Promise<Message[]> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_RESTAPI_ENDPOINT}/chat/${chatId}`);
-    return response.json();
-  };
-
-  // const sendMessage = async (message: string, chatId: string | null): Promise<any> => {
-  //   try {
-  //     const response = await fetch(`${process.env.NEXT_PUBLIC_RESTAPI_ENDPOINT}/chat${chatId ? `?chat_id=${chatId}` : ''}`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'text/plain',
-  //       },
-  //       body: message
-  //     });
-  //     return response.json();
-  //   } catch (error) {
-  //     console.error('Error', error);
-  //   }
-  // };
   const handleModel = (model: string) => {  
           setModel(model);
   }
+
+  // const handleSendMessage = (input: string) => {
+  //   const newMessage: Message = {
+  //     role: "user",
+  //     content: input
+  //   };
+  //   const _messages = [...messages, newMessage];
+  //   setMessages(_messages);
+  //   scrollToBottom();
+  //   setIsLoading(true);
+  //   sendMessage(_messages, model, chatId).then((response) => {
+  //     const message = response.data.choices[0].message; 
+  //     const chat:Chat = {id:response. data.id, title:generateTitle(message.content)}; 
+  //     if (!chatId) {
+  //       let _chats = {...chat, messages: [newMessage, message]};
+  //       setChats([_chats, ...chats]);
+  //       setChatId(response.data.id);
+  //     }else{
+  //     let chat = chats.find((chat) => chat.id === chatId);
+  //     if (!chat) return;
+  //     chat.messages = [messages, newMessage, message];
+  //         const _chats = [chats, ...chats]
+  //     localStorage.setItem("chats", JSON.stringify(_chats));
+  //     setChats(_chats);
+ 
+  //   }
+  //     setMessages([...messages, newMessage, message]);
+  //     scrollToBottom();
+  //   }).catch((error) => {
+  //     alert(`Error sending message, please try again later. ${error}`);
+  //   }).finally(() => {
+  //     setIsLoading(false);
+  //   });
+  // };
+ 
   const handleSendMessage = (input: string) => {
     const newMessage: Message = {
       role: "user",
-      content: input
+      content: input,
     };
+  
     const _messages = [...messages, newMessage];
     setMessages(_messages);
     scrollToBottom();
     setIsLoading(true);
-    sendMessage(_messages, model, chatId).then((response) => {
-      const message = response.data.choices[0].message; 
-      const chat:Chat = {id:response. data.id, title:generateTitle(message.content)}; 
-      if (!chatId) {
-        setChats([chat, ...chats]);
-      }
-      setChatId(response.data.id);
-      setMessages([...messages, newMessage, message]);
-      scrollToBottom();
-    }).catch((error) => {
-      alert(`Error sending message, please try again later. ${error}`);
-    }).finally(() => {
-      setIsLoading(false);
-    });
+  
+    sendMessage(newMessage, model)
+      .then((response) => {
+        const message = response.data.choices[0].message;
+        const chat: Chat = { id: response.data.id, title: generateTitle(message.content) };
+  
+        if (!chatId) {
+          // New chat case
+          let _chats = [{ ...chat, messages: [newMessage, message] }, ...chats];
+          setChats(_chats);
+          setChatId(response.data.id);
+          localStorage.setItem("chats", JSON.stringify(_chats));
+        } else {
+          // Existing chat case
+          let _chats = chats.map((chat) =>
+            chat.id === chatId ? { ...chat, messages: [...chat.messages?? [], newMessage, message] } : chat
+          );
+  
+          localStorage.setItem("chats", JSON.stringify(_chats));
+          setChats(_chats);
+        }
+  
+        setMessages([...messages, newMessage, message]);
+        scrollToBottom();
+      })
+      .catch((error) => {
+        alert(`Error sending message, please try again later. ${error}`);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
-
+  
   const openChat = (chatId: string) => {
     setChatId(chatId);
-    setDrawerOpen(false);
-    fetchChatHistory(chatId).then((data) => {
-      setMessages(data);
-      scrollToBottom();
-      inputFieldRef.current?.focus();
-    });
+    const chat = chats.find((chat) => chat.id === chatId);
+    if (!chat) return;
+    setMessages(chat.messages || []);
+    scrollToBottom();
+    inputFieldRef.current?.focus();
   };
 
   const newChat = () => {
@@ -124,9 +152,6 @@ const App: React.FC = () => {
     inputFieldRef.current?.focus();
   };
 
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   return (
     <div className="antialiased bg-gray-50 dark:bg-gray-900">

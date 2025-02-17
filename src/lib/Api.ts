@@ -4,8 +4,8 @@ const api = axios.create({
   baseURL: process.env.base_url, // Use relative URL for Next.js API routes
 });
 
-export const sendMessage = async (messages: Message[], model: string, chatId:String|null) => {
-  const response = await api.post('/api/chat', { messages, model, chatId });
+export const sendMessage = async (message: Message, model: string) => {
+  const response = await api.post('/api/chat', { message, model });
   return response.data;
 };
 

@@ -1,14 +1,14 @@
-Project Name
+Chatbot
 
 Overview
 
-This project is a full-stack chatbot application built using Next.js with PostgreSQL as the database. It features authentication using JSON Web Token (JWT) and bcrypt for password hashing. The database operations are managed using pg ORM, and the project is written in TypeScript. The backend logic is handled using Next.js API routes.
+This project is a full-stack chatbot application built using Next.js with PostgreSQL as the database. It features authentication using JSON Web Token (JWT) and bcrypt for password hashing. The database operations are managed using pg ORM, and the project is written in TypeScript. The backend logic is handled using Next.js API routes. Additionally, the project utilizes Groq and Firecrawl for enhanced chatbot functionality.
 
 Features
 
 Authentication & Authorization (JWT-based login system)
 
-Chatbot Functionality
+Chatbot Functionality powered by Groq & Firecrawl
 
 Secure Password Hashing with bcrypt
 
@@ -40,6 +40,9 @@ JSON Web Token (JWT) (Authentication)
 
 bcrypt (Password hashing)
 
+Groq (Chatbot processing)
+
+Firecrawl (Enhanced chatbot capabilities)
 Installation
 
 Prerequisites
@@ -74,20 +77,29 @@ Start the development server:
 npm run dev
 
 Project Structure
+├── 📂 app      api routes and layout
+│   ├── 📂 api         # Backend Api routes
 
-📦 your-project
 ├── 📂 components      # Reusable UI components
+
 │   ├── 📂 ui         # UI-related components
+
 ├── 📂 lib            # Backend logic & helpers
+
 │   ├── 📂 auth       # Authentication logic (JWT, bcrypt)
+
 │   ├── 📂 db         # Database interactions
+
 ├── 📂 types          # TypeScript types
-├── 📂 pages          # Next.js pages (frontend UI)
-│   ├── 📂 api        # Backend API routes
+
 ├── 📂 public         # Static assets
+
 ├── .env.local        # Environment variables
+
 ├── next.config.js    # Next.js configuration
+
 ├── package.json      # Dependencies & scripts
+
 └── README.md         # Project documentation
 
 API Endpoints

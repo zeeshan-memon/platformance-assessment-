@@ -43,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ chats, chatId, openChat, newChat }) =
                     setIsOpen(false); // Close sidebar on mobile
                   }}
                 >
-                  <span className="truncate text-ellipsis">{chat.title}</span>
+                  <span className="truncate text-sm">{chat.title}</span>
                 </NavItem>
               ))}
             </ul>
@@ -77,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ chats, chatId, openChat, newChat }) =
                   d="M9 17h6l3 3v-3h2V9h-2M4 4h11v8H9l-3 3v-3H4V4Z"
                 />
               </svg>
-              <span className="ml-3 truncate text-ellipsis">New chat</span>
+              <span className="ml-3 truncate text-sm">New chat</span>
             </NavItem>
           </ul>
         </div>

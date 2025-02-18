@@ -163,6 +163,7 @@ const App: React.FC = () => {
   const openChat = async(chatId: string) => {
     try {
       setChatId(chatId);
+      // setMessages([])
     const res = await fetch(`/api/chat?chatId=${chatId}`,
       {
         method: 'GET',
@@ -213,7 +214,7 @@ const App: React.FC = () => {
       <Sidebar chatId={chatId} chats={chats} newChat={newChat} openChat={openChat} />
 
    <main className="p-4 md:ml-32 pt-20 h-screen flex justify-center items-center bg-transparent  ">
-  <div className="flex flex-col w-full max-w-7xl px-4 h-full">
+  <div className="flex flex-col w-full max-w-6xl px-4 h-full">
     <div className="h-[93%] overflow-x-auto mb-8 pb-12 no-scrollbar">
       <ChatMessages messages={messages} />
       <div ref={messagesEndRef} />

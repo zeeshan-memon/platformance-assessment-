@@ -11,7 +11,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content }) => {
 
       <div className="flex flex-row  gap-2 pt-3 ">
         
-          <div className={`px-4 h-10 w-10 flex items-center justify-center rounded-full 
+          <div className={`px-3 h-8 w-8 flex items-center justify-center rounded-full 
           ${role == "user"? 'bg-indigo-300 text-black text-sm' 
           :'bg-indigo-500 text-white text-sm'}`}>
 
@@ -19,7 +19,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content }) => {
           </div>
 
         <div
-          className={` p-3 text-lg rounded-xl shadow-md ${
+          className={` p-3 text-sm rounded-xl shadow-md ${
             role === 'user'
               ? 'bg-indigo-600 text-white rounded-br-none'
               : 'bg-gray-200 text-black rounded-bl-none'

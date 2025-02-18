@@ -16,7 +16,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({ onSendMessage 
   };
 
   return (
-    <div className="flex items-center mb-3 pt-2 w-full max-w-5xl mx-auto">
+    <div className="flex items-center mb-3 pt-2 w-full max-w-4xl mx-auto">
   <input
     ref={ref}
     type="text"

@@ -40,6 +40,7 @@ export async function POST(req: Request) {
       }
 
       websiteContent = crawlResult.data[0].markdown ?? "";
+      message.content = `Here is content from ${url}:\n\n${websiteContent}\n\nUser's question: ${message.content}`;
     }
     const chat_id = chatId || message.chatId;
     // Store new chat if it doesn't exist
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
       'INSERT INTO messages(chatid, role, content) VALUES($1, $2, $3) RETURNING chatid',
       [message.chatId, message.role, message.content]
     )
-    message.content = `Here is content from ${url}:\n\n${websiteContent}\n\nUser's question: ${message.content}`;
+
     // Generate response from Groq
     const completion = await groq.chat.completions.create({
       messages: [{content:message.content, role: message.role}],

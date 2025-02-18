@@ -8,6 +8,8 @@ import Dropdown from '@/components/ui/Dropdown';
 import { v4 as uuidv4 } from 'uuid';
 import AuthPage from '@/components/AuthPage';
 import Sidebar from '@/components/ui/SideBar';
+import { Chat } from '@/types/Chat';
+import { Message } from '@/types/Message';
 
 const App: React.FC = () => {
   const [chatId, setChatId] = useState<string | null>(null);

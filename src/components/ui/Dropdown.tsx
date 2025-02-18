@@ -5,7 +5,7 @@ interface DropdownProps {
 }
 const Dropdown: React.FC<DropdownProps> = ({setModel}) => {
   // State to store the fetched options
-  const [options, setOptions] = useState([
+  const options =[
     "qwen-2.5-coder-32b",
     "llama-3.2-1b-preview",
     "llama-guard-3-8b",
@@ -25,7 +25,7 @@ const Dropdown: React.FC<DropdownProps> = ({setModel}) => {
     "llama-3.1-8b-instant",
     "deepseek-r1-distill-llama-70b",
     "llama-3.3-70b-specdec"
-]);
+]
 
   // State to store the selected option
   const [selectedOption, setSelectedOption] = useState('');

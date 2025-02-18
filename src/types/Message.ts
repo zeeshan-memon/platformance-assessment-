@@ -1,4 +1,4 @@
-interface Message {
+export interface Message {
     role: 'user' | 'assistant';
     content: string;
     chatId:string;

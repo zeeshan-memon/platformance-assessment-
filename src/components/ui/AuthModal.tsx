@@ -28,80 +28,86 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type, switchModa
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    const email = (event.target as any).email.value;
-    const password = (event.target as any).password.value;
-    const confirmPassword = (event.target as any).confirmPassword?.value;
-
+    const email = (event.target as HTMLFormElement).email.value;
+    const password = (event.target as HTMLFormElement).password.value;
+    const confirmPassword = (event.target as HTMLFormElement).confirmPassword?.value;
+  
     let valid = true;
-
+  
     // Reset errors
     setEmailError(null);
     setPasswordError(null);
     setConfirmPasswordError(null);
-
+  
     // Validate email
     if (!validateEmail(email)) {
       setEmailError('Please enter a valid email address.');
       valid = false;
     }
-
+  
     // Validate password
     if (!validatePassword(password)) {
       setPasswordError('Password must be at least 6 characters.');
       valid = false;
     }
-
-    // Validate confirm password if signup
+  
+    // Validate confirm password
     if (type === 'signup' && password !== confirmPassword) {
       setConfirmPasswordError('Passwords do not match.');
       valid = false;
     }
-
+  
     if (valid) {
       if (type === 'login') {
-        try {
-          const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-          });
-          const res= await response.json()
-          if(response.ok){
-            const user = res.response.user
-            localStorage.setItem('user', JSON.stringify(user))
-            localStorage.setItem('token', res.response.token)
-            window.dispatchEvent(new Event('authChange')); // Ensures AuthPage updates
-            onClose()
-          } else {
-            alert(res.response);
-          }
-
-        } catch (error) {
-          console.log("error", error)
-          alert(error);
-        }
-        } else {
-          try {
-            const response = await fetch("/api/auth/signup", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, password }),
-            });
-            const res= await response.json()
-            if(response.ok){
-              switchModal('login')
-            } else {
-              alert(res.response);
-            }
-  
-          } catch (error) {
-            console.log("error", error)
-            alert(error);
-          }
+        await handleLogin(email, password);
+      } else {
+        await handleSignup(email, password);
       }
     }
   };
+  
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const res = await response.json();
+      if (response.ok) {
+        const user = res.response.user;
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('token', res.response.token);
+        window.dispatchEvent(new Event('authChange')); // Ensures AuthPage updates
+        onClose();
+      } else {
+        alert(res.response);
+      }
+    } catch (error) {
+      console.log("error", error);
+      alert(error);
+    }
+  };
+  
+  const handleSignup = async (email: string, password: string) => {
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const res = await response.json();
+      if (response.ok) {
+        switchModal('login');
+      } else {
+        alert(res.response);
+      }
+    } catch (error) {
+      console.log("error", error);
+      alert(error);
+    }
+  };
+  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">

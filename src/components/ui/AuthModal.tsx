@@ -66,9 +66,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type, switchModa
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
           });
-          let res= await response.json()
+          const res= await response.json()
           if(response.ok){
-            let user = res.response.user
+            const user = res.response.user
             localStorage.setItem('user', JSON.stringify(user))
             localStorage.setItem('token', res.response.token)
             window.dispatchEvent(new Event('authChange')); // Ensures AuthPage updates
@@ -88,7 +88,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type, switchModa
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email, password }),
             });
-            let res= await response.json()
+            const res= await response.json()
             if(response.ok){
               switchModal('login')
             } else {

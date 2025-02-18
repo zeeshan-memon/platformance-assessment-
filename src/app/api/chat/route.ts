@@ -1,5 +1,5 @@
 import Groq from "groq-sdk";
-import FirecrawlApp, { SearchParams } from "@mendable/firecrawl-js";
+import FirecrawlApp from "@mendable/firecrawl-js";
 import {pool} from "../../../lib/db"
 import {verifyJwt} from "../../../lib/auth"
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     // Detect URLs
     const urlRegex = /https?:\/\/[^\s]+/g;
     const urls = message.content?.match(urlRegex);
-    let url = urls?.[0] || "";
+    const url = urls?.[0] || "";
 
     if (url) {
       const crawlResult = await app.crawlUrl(url, {
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       websiteContent = crawlResult.data[0].markdown ?? "";
       message.content = `Here is content from ${url}:\n\n${websiteContent}\n\nUser's question: ${message.content}`;
     }
-    let chat_id = chatId || message.chatId;
+    const chat_id = chatId || message.chatId;
     // Store new chat if it doesn't exist
     if (!chatId) {
       await pool.query(

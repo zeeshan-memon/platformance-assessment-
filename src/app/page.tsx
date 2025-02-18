@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChatMessages from '../components/ChatMessages';
 import ChatInput from '../components/ChatInput';
-import NavItem from '../components/NavItem';
 import ChatBubble from '@/components/ChatBubble';
 import Dropdown from '@/components/ui/Dropdown';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +10,6 @@ import AuthPage from '@/components/AuthPage';
 import Sidebar from '@/components/ui/SideBar';
 
 const App: React.FC = () => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -89,7 +87,7 @@ const App: React.FC = () => {
       return;
     }
   
-    let title =generateTitle(input)
+    const title =generateTitle(input)
     const newMessage: Message = {
       role: "user",
       content: input,
@@ -145,14 +143,14 @@ const App: React.FC = () => {
     }
   
     if (!chatId) {
-      let newChats:Chat[] = [
+      const newChats:Chat[] = [
         { id: newMessage.chatId, title: title, messages: [newMessage, { role: "assistant", content: accumulatedMessage, chatId: chatId ?? uuidv4(),  }] },
         ...chats,
       ];
       setChats(newChats);
       setChatId(newMessage.chatId);
     } else {
-      let updatedChats:Chat[] = chats.map((c) =>
+      const updatedChats:Chat[] = chats.map((c) =>
         c.id === chatId ? { ...c, messages: [...c.messages, newMessage, { role: "assistant", content: accumulatedMessage, chatId:chatId }] } : c
       );
       setChats(updatedChats);

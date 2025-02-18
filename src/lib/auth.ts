@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 
 interface JwtPayload {
   id: number;  
-  email:String;
+  email:string;
   userid:string;
   iat: number;
   exp: number;
@@ -18,7 +18,7 @@ export const signJwt = (payload: object) => {
 export const verifyJwt = (token: string):JwtPayload | null => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-  } catch (error) {
+  } catch (_) {
     return null; // Invalid token
   }
 };

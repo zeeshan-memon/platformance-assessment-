@@ -8,6 +8,7 @@ import ChatBubble from '@/components/ChatBubble';
 import Dropdown from '@/components/ui/Dropdown';
 import { v4 as uuidv4 } from 'uuid';
 import AuthPage from '@/components/AuthPage';
+import Sidebar from '@/components/ui/SideBar';
 
 const App: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -209,34 +210,7 @@ const App: React.FC = () => {
           <AuthPage modalType={modalType} setModalType={setAuthModal} loggedOut={loggedOut} token={token} setToken={setAuthToken}/>
         </div>
       </nav>
-
-
-      <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0`}
-        aria-label="Sidenav"
-      >
-        <div className="overflow-y-auto py-5 px-3 h-full bg-white">
-          {chats.length > 0 && <ul className="space-y-2">
-            {chats.map((chat, index) => (
-              <NavItem key={index} active={chatId === chat.id} onClick={() => openChat(chat.id)}>
-                <span className="truncate text-ellipsis">
-                  {chat.title}
-                </span>
-              </NavItem>
-            ))}
-          </ul>}
-          <ul className={`pt-5 space-y-2 ${chats.length > 0 ? 'mt-5 border-t border-gray-200' : ''}`}>
-            <NavItem active={!chatId} onClick={() => newChat()}>
-              <svg className="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17h6l3 3v-3h2V9h-2M4 4h11v8H9l-3 3v-3H4V4Z" />
-              </svg>
-              <span className="ml-3 truncate text-ellipsis">
-                New chat
-              </span>
-            </NavItem>
-          </ul>
-        </div>
-      </aside>
+      <Sidebar chatId={chatId} chats={chats} newChat={newChat} openChat={openChat} />
 
    <main className="p-4 md:ml-32 pt-20 h-screen flex justify-center items-center bg-transparent  ">
   <div className="flex flex-col w-full max-w-7xl px-4 h-full">

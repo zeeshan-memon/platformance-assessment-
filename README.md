@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Project Name
 
-## Getting Started
+Overview
 
-First, run the development server:
+This project is a full-stack chatbot application built using Next.js with PostgreSQL as the database. It features authentication using JSON Web Token (JWT) and bcrypt for password hashing. The database operations are managed using pg ORM, and the project is written in TypeScript. The backend logic is handled using Next.js API routes.
 
-```bash
+Features
+
+Authentication & Authorization (JWT-based login system)
+
+Chatbot Functionality
+
+Secure Password Hashing with bcrypt
+
+Database Management using PostgreSQL & pg ORM
+
+Backend API Routes in Next.js
+
+Responsive UI with Next.js & Tailwind CSS
+
+Tech Stack
+
+Frontend:
+
+Next.js (React framework for SSR & SSG)
+
+Tailwind CSS (Utility-first styling)
+
+TypeScript (Static typing)
+
+Backend:
+
+Next.js API Routes (Server-side logic)
+
+PostgreSQL (Relational database)
+
+pg ORM (Database management)
+
+JSON Web Token (JWT) (Authentication)
+
+bcrypt (Password hashing)
+
+Installation
+
+Prerequisites
+
+Node.js (v18+ recommended)
+
+PostgreSQL installed & running
+
+Setup Instructions
+
+Clone the repository:
+
+git clone https://github.com/zeeshan-memon/platformance-assessment-.git
+cd platformance-assessment
+
+Install dependencies:
+
+npm install
+
+Set up environment variables:
+Create a .env.local file and add the following:
+
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+JWT_SECRET=your_jwt_secret
+
+Run database migrations (if applicable):
+
+npx prisma migrate dev
+
+Start the development server:
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+📦 your-project
+├── 📂 components      # Reusable UI components
+│   ├── 📂 ui         # UI-related components
+├── 📂 lib            # Backend logic & helpers
+│   ├── 📂 auth       # Authentication logic (JWT, bcrypt)
+│   ├── 📂 db         # Database interactions
+├── 📂 types          # TypeScript types
+├── 📂 pages          # Next.js pages (frontend UI)
+│   ├── 📂 api        # Backend API routes
+├── 📂 public         # Static assets
+├── .env.local        # Environment variables
+├── next.config.js    # Next.js configuration
+├── package.json      # Dependencies & scripts
+└── README.md         # Project documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+API Endpoints
 
-## Learn More
+Authentication
 
-To learn more about Next.js, take a look at the following resources:
+POST /api/auth/login - User login
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+POST /api/auth/register - User registration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Chat
 
-## Deploy on Vercel
+GET /api/chats - Fetch all chats
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+POST /api/chats - Create a new chat
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+GET /api/chats/:id - Fetch chat messages
+
+Deployment
+
+Vercel (Recommended)
+
+Install Vercel CLI:
+
+npm install -g vercel
+
+Deploy:
+
+vercel
+
+Contributing
+
+Fork the repository
+
+Create a new branch (git checkout -b feature-branch)
+
+Commit your changes (git commit -m 'Add new feature')
+
+Push to your branch (git push origin feature-branch)
+
+Open a pull request
+
+License
+
+This project is licensed under the MIT License.

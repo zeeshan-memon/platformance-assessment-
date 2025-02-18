@@ -2,7 +2,7 @@ import React from 'react';
 
 interface ChatBubbleProps {
   role: 'user' | 'assistant';
-  content: String;
+  content: string;
 }
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ role, content }) => {

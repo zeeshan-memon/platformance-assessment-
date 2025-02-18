@@ -7,8 +7,8 @@ interface AuthModalProps {
   modalType: 'login' | 'signup' | null;
   setModalType: (type: 'login' | 'signup' | null) => void;
   loggedOut: () => void;
-  setToken: (token: String| null) => void;
-  token: String|null
+  setToken: (token: string| null) => void;
+  token: string|null
 }
 
 const AuthPage: React.FC<AuthModalProps> = ({ modalType, setModalType, loggedOut, token, setToken }) => {

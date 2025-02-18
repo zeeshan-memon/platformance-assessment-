@@ -18,7 +18,7 @@ export const signJwt = (payload: object) => {
 export const verifyJwt = (token: string):JwtPayload | null => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-  } catch (_) {
+  } catch (error) {
     return null; // Invalid token
   }
 };

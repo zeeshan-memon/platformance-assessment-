@@ -1,5 +1,5 @@
 interface Message {
     role: 'user' | 'assistant';
-    content: String;
+    content: string;
     chatId:string;
 }

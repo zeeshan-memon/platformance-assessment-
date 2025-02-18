@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [model, setModel] = useState('qwen-2.5-coder-32b');
   const [modalType, setModalType] = useState<'login' | 'signup' | null>(null);
-  const [token, setToken] = useState<String | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   
   const getChats = async ()=>{
@@ -59,10 +59,10 @@ const App: React.FC = () => {
     setModalType(type)
   }
  
-  const setAuthToken = (token: String | null) =>{
+  const setAuthToken = (token: string | null) =>{
     setToken(token)
   }
-  const generateTitle = (text: String): string => {
+  const generateTitle = (text: string): string => {
     if (!text) return "New Chat";
 
   // Remove common words and split into words

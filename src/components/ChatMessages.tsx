@@ -3,7 +3,7 @@ import ChatBubble from './ChatBubble';
 
 interface Message {
   role: 'user' | 'assistant';
-  content: String,
+  content: string,
 }
 
 interface ChatMessagesProps {

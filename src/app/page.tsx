@@ -4,9 +4,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import ChatMessages from '../components/ChatMessages';
 import ChatInput from '../components/ChatInput';
 import NavItem from '../components/NavItem';
-import { sendMessage } from '@/lib/Api';
 import ChatBubble from '@/components/ChatBubble';
 import Dropdown from '@/components/ui/Dropdown';
+import { v4 as uuidv4 } from 'uuid';
+import AuthPage from '@/components/AuthPage';
 
 const App: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -17,15 +18,36 @@ const App: React.FC = () => {
   const inputFieldRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [model, setModel] = useState('qwen-2.5-coder-32b');
+  const [modalType, setModalType] = useState<'login' | 'signup' | null>(null);
+  const [token, setToken] = useState<String | null>(null);
 
+  
+  const getChats = async ()=>{
+    try {
+      if(!token)
+          return
+
+    const res = await fetch(`/api/chat`,{
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
+    if(!res.ok){
+      alert(data.response)
+      return
+    }
+    setChats(data.response);
+    } catch (error) {
+      alert(error)
+    }
+  }
   useEffect(() => {
     inputFieldRef.current?.focus();
-    const chats = localStorage.getItem("chats");
-    if (chats) {
-      setChats(JSON.parse(chats));
-    }
+    getChats()
 
-  }, []);
+  }, [token]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -33,7 +55,15 @@ const App: React.FC = () => {
     }, 100);
   };
 
-  const generateTitle = (text: string): string => {
+
+  const setAuthModal = (type: 'login' | 'signup' | null) =>{
+    setModalType(type)
+  }
+ 
+  const setAuthToken = (token: String | null) =>{
+    setToken(token)
+  }
+  const generateTitle = (text: String): string => {
     if (!text) return "New Chat";
 
   // Remove common words and split into words
@@ -45,105 +75,114 @@ const App: React.FC = () => {
     .filter((word) => !stopWords.has(word)); // Remove common words
 
   return words.slice(0, 5).join(" ") + "..."; // Use first 5 words
-    // return text
-    //   .toLowerCase()
-    //   .split(" ")
-    //   .map((word, index) =>
-    //     ["a", "an", "the", "of", "in", "on", "at", "to", "for", "with", "and", "but", "or"].includes(word) && index !== 0
-    //       ? word
-    //       : word.charAt(0).toUpperCase() + word.slice(1)
-    //   )
-    //   .join(" ");
   };
 
   const handleModel = (model: string) => {  
           setModel(model);
   }
 
-  // const handleSendMessage = (input: string) => {
-  //   const newMessage: Message = {
-  //     role: "user",
-  //     content: input
-  //   };
-  //   const _messages = [...messages, newMessage];
-  //   setMessages(_messages);
-  //   scrollToBottom();
-  //   setIsLoading(true);
-  //   sendMessage(_messages, model, chatId).then((response) => {
-  //     const message = response.data.choices[0].message; 
-  //     const chat:Chat = {id:response. data.id, title:generateTitle(message.content)}; 
-  //     if (!chatId) {
-  //       let _chats = {...chat, messages: [newMessage, message]};
-  //       setChats([_chats, ...chats]);
-  //       setChatId(response.data.id);
-  //     }else{
-  //     let chat = chats.find((chat) => chat.id === chatId);
-  //     if (!chat) return;
-  //     chat.messages = [messages, newMessage, message];
-  //         const _chats = [chats, ...chats]
-  //     localStorage.setItem("chats", JSON.stringify(_chats));
-  //     setChats(_chats);
- 
-  //   }
-  //     setMessages([...messages, newMessage, message]);
-  //     scrollToBottom();
-  //   }).catch((error) => {
-  //     alert(`Error sending message, please try again later. ${error}`);
-  //   }).finally(() => {
-  //     setIsLoading(false);
-  //   });
-  // };
- 
-  const handleSendMessage = (input: string) => {
+  
+  const handleSendMessage = async (input: string) => {
+    if (!localStorage.getItem("token")) {
+      setAuthModal("login");
+      return;
+    }
+  
+    let title =generateTitle(input)
     const newMessage: Message = {
       role: "user",
       content: input,
+      chatId: chatId || uuidv4(), // Generate chatId if it's a new chat
     };
   
-    const _messages = [...messages, newMessage];
-    setMessages(_messages);
+    setMessages((prev) => [...prev, newMessage]);
     scrollToBottom();
     setIsLoading(true);
   
-    sendMessage(newMessage, model)
-      .then((response) => {
-        const message = response.data.choices[0].message;
-        const chat: Chat = { id: response.data.id, title: generateTitle(message.content) };
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, },
+      body: JSON.stringify({
+        message: newMessage,
+        model: model,
+        chatId: chatId, // Send existing chatId if available
+        title:title,
+      }),
+    });
   
-        if (!chatId) {
-          // New chat case
-          let _chats = [{ ...chat, messages: [newMessage, message] }, ...chats];
-          setChats(_chats);
-          setChatId(response.data.id);
-          localStorage.setItem("chats", JSON.stringify(_chats));
-        } else {
-          // Existing chat case
-          let _chats = chats.map((chat) =>
-            chat.id === chatId ? { ...chat, messages: [...chat.messages?? [], newMessage, message] } : chat
-          );
+    if(!response.ok){
+      setIsLoading(false)
+      alert('something went wrong')
+      return
+    }
+    setIsLoading(false);
   
-          localStorage.setItem("chats", JSON.stringify(_chats));
-          setChats(_chats);
-        }
+    if (!response.body) {
+      console.error("Response body is empty");
+      return;
+    }
   
-        setMessages([...messages, newMessage, message]);
-        scrollToBottom();
-      })
-      .catch((error) => {
-        alert(`Error sending message, please try again later. ${error}`);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedMessage = "";
+  
+    setMessages((prev) => [...prev, { role: "assistant", content: "", chatId: "" }]);
+    window.scrollTo(0, 0);
+  
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+  
+      const chunk = decoder.decode(value, { stream: true });
+      accumulatedMessage += chunk;
+  
+      setMessages((prev) =>
+        prev.map((msg, index) =>
+          index === prev.length - 1 ? { ...msg, content: accumulatedMessage } : msg
+        )
+      );
+    }
+  
+    if (!chatId) {
+      let newChats:Chat[] = [
+        { id: newMessage.chatId, title: title, messages: [newMessage, { role: "assistant", content: accumulatedMessage, chatId: chatId ?? uuidv4(),  }] },
+        ...chats,
+      ];
+      setChats(newChats);
+      setChatId(newMessage.chatId);
+    } else {
+      let updatedChats:Chat[] = chats.map((c) =>
+        c.id === chatId ? { ...c, messages: [...c.messages, newMessage, { role: "assistant", content: accumulatedMessage, chatId:chatId }] } : c
+      );
+      setChats(updatedChats);
+    }
   };
   
-  const openChat = (chatId: string) => {
-    setChatId(chatId);
-    const chat = chats.find((chat) => chat.id === chatId);
-    if (!chat) return;
-    setMessages(chat.messages || []);
+
+  const openChat = async(chatId: string) => {
+    try {
+      setChatId(chatId);
+    const res = await fetch(`/api/chat?chatId=${chatId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await res.json();
+    if(!res.ok){
+      alert(data.response)
+      return
+    }
+      
+    setMessages(data.response);
+    
     scrollToBottom();
     inputFieldRef.current?.focus();
+    } catch (error) {
+      alert(error)
+    }
   };
 
   const newChat = () => {
@@ -152,22 +191,31 @@ const App: React.FC = () => {
     inputFieldRef.current?.focus();
   };
 
+    // Logout function
+    const loggedOut = () => {
+      localStorage.removeItem('token');
+      window.dispatchEvent(new Event('authChange')); // Custom event for state update
+      setChatId(null);
+      setMessages([]);
+      setChats([]);
+    };
 
   return (
-    <div className="antialiased bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white border-b border-gray-200 px-8 py-4 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50 h-16">
+    <div className="antialiased bg-gray-50">
+      <nav className="bg-white border-b border-gray-200 px-8 py-2 fixed left-0 right-0 top-0 z-50 h-14">
         <div className="flex justify-between items-center">
-          <span className="p-1 font-semibold whitespace-nowrap dark:text-white">Chatbot</span>
+          <span className="p-1 font-semibold whitespace-nowrap">Chatbot</span>
           <Dropdown setModel={handleModel}/>
+          <AuthPage modalType={modalType} setModalType={setAuthModal} loggedOut={loggedOut} token={token} setToken={setAuthToken}/>
         </div>
       </nav>
 
 
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform ${drawerOpen ? 'translate-x-0' : '-translate-x-full'} bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700`}
+        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0`}
         aria-label="Sidenav"
       >
-        <div className="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
+        <div className="overflow-y-auto py-5 px-3 h-full bg-white">
           {chats.length > 0 && <ul className="space-y-2">
             {chats.map((chat, index) => (
               <NavItem key={index} active={chatId === chat.id} onClick={() => openChat(chat.id)}>
@@ -177,9 +225,9 @@ const App: React.FC = () => {
               </NavItem>
             ))}
           </ul>}
-          <ul className={`pt-5 space-y-2 ${chats.length > 0 ? 'mt-5 border-t border-gray-200 dark:border-gray-700' : ''}`}>
+          <ul className={`pt-5 space-y-2 ${chats.length > 0 ? 'mt-5 border-t border-gray-200' : ''}`}>
             <NavItem active={!chatId} onClick={() => newChat()}>
-              <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17h6l3 3v-3h2V9h-2M4 4h11v8H9l-3 3v-3H4V4Z" />
               </svg>
               <span className="ml-3 truncate text-ellipsis">
@@ -190,17 +238,22 @@ const App: React.FC = () => {
         </div>
       </aside>
 
-      <main className="p-4 md:ml-64 pt-20 dark:text-white h-screen">
-        <div className="flex flex-col flex-auto flex-shrink-0 rounded-2xl h-full py-2 px-4">
-          
-          <div className="h-full overflow-x-auto mb-6">
-            <ChatMessages messages={messages} />
-            <div ref={messagesEndRef} />
-            {isLoading && <div className=' px-2'> <ChatBubble role="assistant" content="Thinking..." /></div>}
-          </div>
-          <ChatInput onSendMessage={handleSendMessage} ref={inputFieldRef} />
+   <main className="p-4 md:ml-32 pt-20 h-screen flex justify-center items-center bg-transparent  ">
+  <div className="flex flex-col w-full max-w-7xl px-4 h-full">
+    <div className="h-[93%] overflow-x-auto mb-8 pb-12 no-scrollbar">
+      <ChatMessages messages={messages} />
+      <div ref={messagesEndRef} />
+      {isLoading && (
+        <div className="grid grid-cols-12 gap-y-2  pt-4">
+          <ChatBubble role="assistant" content="Thinking..." />
         </div>
-      </main>
+      )}
+    </div>
+    <div className="fixed bottom-0 left-0 right-0 bg-transparent py-2 px-4 z-50 md:ml-48 ">
+      <ChatInput onSendMessage={handleSendMessage} ref={inputFieldRef} />
+    </div>
+  </div>
+</main>
     </div>
   );
 };

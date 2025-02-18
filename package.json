@@ -11,16 +11,21 @@
   "dependencies": {
     "@mendable/firecrawl-js": "^1.17.0",
     "axios": "^1.7.9",
+    "bcryptjs": "^3.0.1",
     "express-rate-limit": "^7.5.0",
     "groq-sdk": "^0.15.0",
+    "jsonwebtoken": "^9.0.2",
     "next": "15.1.7",
+    "pg": "^8.13.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^20",
+    "@types/pg": "^8.11.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

@@ -10,7 +10,7 @@ const NavItem: React.FC<NavItemProps> = ({ children, active, onClick }) => {
   return (
     <li>
       <div
-        className={`flex items-center cursor-pointer px-3 py-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group ${active ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
+        className={`flex items-center cursor-pointer px-3 py-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100  group ${active ? 'bg-gray-200' : ''}`}
         onClick={onClick}
       >
         {children}

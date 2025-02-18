@@ -10,12 +10,11 @@ interface AuthModalProps {
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type, switchModal }) => {
-  if (!isOpen) return null;
 
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
-
+  if (!isOpen) return null;
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
@@ -28,17 +27,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type, switchModa
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+        // Reset errors
+        setEmailError(null);
+        setPasswordError(null);
+        setConfirmPasswordError(null);
+      
     const email = (event.target as HTMLFormElement).email.value;
     const password = (event.target as HTMLFormElement).password.value;
     const confirmPassword = (event.target as HTMLFormElement).confirmPassword?.value;
   
     let valid = true;
   
-    // Reset errors
-    setEmailError(null);
-    setPasswordError(null);
-    setConfirmPasswordError(null);
-  
+
     // Validate email
     if (!validateEmail(email)) {
       setEmailError('Please enter a valid email address.');
